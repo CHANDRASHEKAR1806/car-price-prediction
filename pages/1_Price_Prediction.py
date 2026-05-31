@@ -311,7 +311,7 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align:center'>
 
-<h3>🛞 AutoIntel</h3>
+<h3>🛞 AutoDriven</h3>
 
 <p>
 Strategic Automobile Market Segmentation & Price Prediction
