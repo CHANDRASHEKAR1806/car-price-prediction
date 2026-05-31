@@ -141,7 +141,7 @@ st.markdown("---")
 
 st.markdown("""
 <center>
-<h3>🚘 AutoIntel</h3>
+<h3>🚘 AutoDriven</h3>
 <p>Market Segmentation Module</p>
 </center>
 """, unsafe_allow_html=True)
