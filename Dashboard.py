@@ -5,6 +5,12 @@ st.set_page_config(
     page_icon="🚗",
     layout="wide"
 )
+
+
+
+# ==========================================
+# FOOTER
+# ==========================================
 st.markdown("""
 <style>
 
@@ -97,8 +103,7 @@ st.markdown("""
 
 st.markdown("""
 <h1 style='font-size:55px'>
-🚗 Autodriven
-</h1>
+🚗 AutoDriven</h1>
 
 <h3 style='color:#3b82f6'>
 AI Vehicle Intelligence Platform
@@ -259,6 +264,11 @@ with col3:
     st.info("📊 3 customer market segments identified")
 
 st.markdown("---")
+st.link_button(
+    "🔗 View Source Code",
+    "https://github.com/CHANDRASHEKAR1806/car-price-prediction"
+)
+
 
 # =========================
 # FOOTER
