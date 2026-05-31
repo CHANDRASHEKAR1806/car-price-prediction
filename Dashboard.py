@@ -271,7 +271,7 @@ st.markdown("---")
 st.markdown("""
 <center>
 
-<h4>🚗 AutoIntel</h4>
+<h4>🚗 AutoDriven</h4>
 
 Strategic Automobile Analytics Platform
 
