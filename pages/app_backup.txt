@@ -1,0 +1,262 @@
+import streamlit as st
+import joblib
+import numpy as np
+from pathlib import Path
+
+# =====================================================
+# PROJECT DIRECTORY
+# =====================================================
+BASE_DIR = Path(__file__).parent
+
+# =====================================================
+# PAGE CONFIG
+# =====================================================
+st.set_page_config(
+    page_title="Strategic Automobile Market Segmentation & Price Prediction",
+    page_icon="🚗",
+    layout="wide"
+)
+
+# =====================================================
+# LOAD MODEL
+# =====================================================
+model = joblib.load(BASE_DIR / "car_price_gradient_boosting.pkl")
+
+# =====================================================
+# HELPER FUNCTION FOR IMAGES
+# =====================================================
+def show_image(filename):
+    path = BASE_DIR / filename
+
+    if path.exists():
+        st.image(path)
+    else:
+        st.error(f"Image not found: {filename}")
+
+# =====================================================
+# TITLE
+# =====================================================
+st.title("🚗 Automobile Price Prediction")
+
+st.markdown("""
+<div style='background-color:#1f77b4;padding:15px;border-radius:10px'>
+<h2 style='color:white;text-align:center'>
+AI Powered Car Price Prediction System
+</h2>
+</div>
+""", unsafe_allow_html=True)
+
+st.sidebar.title("Project Details")
+
+st.sidebar.info("""
+Automobile Market Segmentation &
+Price Prediction System
+
+Model: Gradient Boosting Regressor
+Accuracy (R²): 95.8%
+Dataset Size: 11,914 Cars
+""")
+
+st.markdown("""
+### AI-Powered Automobile Price Prediction
+
+This application predicts car prices using a trained Gradient Boosting Machine Learning model.
+""")
+
+st.markdown("---")
+
+# =====================================================
+# MODEL PERFORMANCE
+# =====================================================
+st.subheader("📊 Model Performance")
+
+st.write("""
+✅ Linear Regression R² = 0.6201
+
+✅ Random Forest R² = 0.9729
+
+✅ Gradient Boosting R² = 0.9583
+
+🏆 Selected Model: Gradient Boosting
+""")
+
+with st.sidebar:
+    st.header("Project Information")
+
+    st.write("Dataset Size: 11,914 Cars")
+    st.write("Features: 16")
+    st.write("Best Model: Gradient Boosting")
+    st.write("R² Score: 0.9583")
+    st.markdown("---")
+
+# =====================================================
+# SEGMENTS
+# =====================================================
+st.subheader("🚘 Market Segments Discovered")
+
+st.write("""
+### Economy Commuters
+- Average Price: $23,565
+- Average HP: 168
+- Highway MPG: 33
+
+### Mid-Range Family
+- Average Price: $39,171
+- Average HP: 290
+- Highway MPG: 23
+
+### Luxury Sports
+- Average Price: $219,890
+- Average HP: 545
+- Highway MPG: 19
+""")
+
+# =====================================================
+# INPUTS
+# =====================================================
+engine_hp = st.number_input("Engine HP", value=335.0)
+highway_mpg = st.number_input("Highway MPG", value=26.0)
+city_mpg = st.number_input("City MPG", value=19.0)
+engine_cylinders = st.number_input("Engine Cylinders", value=6.0)
+num_doors = st.number_input("Number of Doors", value=2.0)
+year = st.number_input("Year", value=2017)
+popularity = st.number_input("Popularity", value=3916)
+
+# =====================================================
+# DROPDOWNS
+# =====================================================
+make_enc = st.selectbox(
+    "Car Brand",
+    ["BMW", "Audi", "Toyota", "Honda", "Ford"]
+)
+
+fuel_enc = st.selectbox(
+    "Fuel Type",
+    ["Premium", "Regular", "Diesel"]
+)
+
+trans_enc = st.selectbox(
+    "Transmission",
+    ["Manual", "Automatic"]
+)
+
+drive_enc = st.selectbox(
+    "Drive Type",
+    ["Rear Wheel Drive", "Front Wheel Drive", "All Wheel Drive"]
+)
+
+size_enc = st.selectbox(
+    "Vehicle Size",
+    ["Compact", "Midsize", "Large"]
+)
+
+style_enc = st.selectbox(
+    "Vehicle Style",
+    ["Coupe", "Sedan", "SUV", "Convertible"]
+)
+
+# =====================================================
+# ENCODING MAPS
+# =====================================================
+make_map = {
+    "BMW": 7,
+    "Audi": 1,
+    "Toyota": 2,
+    "Honda": 3,
+    "Ford": 4
+}
+
+fuel_map = {
+    "Premium": 3,
+    "Regular": 1,
+    "Diesel": 2
+}
+
+trans_map = {
+    "Manual": 4,
+    "Automatic": 0
+}
+
+drive_map = {
+    "Rear Wheel Drive": 2,
+    "Front Wheel Drive": 1,
+    "All Wheel Drive": 0
+}
+
+size_map = {
+    "Compact": 0,
+    "Midsize": 1,
+    "Large": 2
+}
+
+style_map = {
+    "Coupe": 2,
+    "Sedan": 3,
+    "SUV": 4,
+    "Convertible": 1
+}
+
+# =====================================================
+# PREDICTION
+# =====================================================
+if st.button("Predict Price"):
+
+    make_value = make_map[make_enc]
+    fuel_value = fuel_map[fuel_enc]
+    trans_value = trans_map[trans_enc]
+    drive_value = drive_map[drive_enc]
+    size_value = size_map[size_enc]
+    style_value = style_map[style_enc]
+
+    features = np.array([[
+        engine_hp,
+        highway_mpg,
+        city_mpg,
+        engine_cylinders,
+        num_doors,
+        year,
+        popularity,
+        make_value,
+        fuel_value,
+        trans_value,
+        drive_value,
+        size_value,
+        style_value
+    ]])
+
+    prediction = model.predict(features)
+
+    st.success(f"💰 Predicted Price: ${prediction[0]:,.2f}")
+
+# =====================================================
+# VISUALIZATIONS
+# =====================================================
+st.markdown("---")
+
+st.header("📈 Model Comparison")
+show_image("model_comparison.png")
+
+st.header("🎯 Actual vs Predicted")
+show_image("actual_vs_predicted.png")
+
+st.header("⭐ Feature Importance")
+show_image("feature_importance.png")
+
+st.header("🚘 Market Segmentation")
+show_image("cluster_visualization.png")
+
+# =====================================================
+# FOOTER
+# =====================================================
+st.markdown("---")
+
+st.write("Developed By")
+st.write("Chandrashekar Jadhav")
+st.write("B.Tech AI & ML")
+st.write("Marwadi University")
+
+st.markdown("---")
+
+st.caption(
+    "Strategic Automobile Market Segmentation & Price Prediction | Built with Python, Scikit-Learn, Streamlit and XGBoost"
+)
