@@ -157,7 +157,7 @@ st.markdown("---")
 
 st.markdown("""
 <center>
-<h3>🚘 AutoIntel</h3>
+<h3>🚘 AutoDriven</h3>
 <p>Strategic Automobile Analytics Platform</p>
 <p>© 2026 All Rights Reserved</p>
 </center>
