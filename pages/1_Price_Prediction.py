@@ -138,78 +138,78 @@ with col2:
     popularity = st.number_input("Popularity", value=1500)
 
 # =====================================================
-# DROPDOWNS
-# =====================================================
-make_enc = st.selectbox(
-    "Car Brand",
-    ["BMW", "Audi", "Toyota", "Honda", "Ford"]
-)
-
-fuel_enc = st.selectbox(
-    "Fuel Type",
-    ["Premium", "Regular", "Diesel"]
-)
-
-trans_enc = st.selectbox(
-    "Transmission",
-    ["Manual", "Automatic"]
-)
-
-drive_enc = st.selectbox(
-    "Drive Type",
-    ["Rear Wheel Drive", "Front Wheel Drive", "All Wheel Drive"]
-)
-
-size_enc = st.selectbox(
-    "Vehicle Size",
-    ["Compact", "Midsize", "Large"]
-)
-
-style_enc = st.selectbox(
-    "Vehicle Style",
-    ["Coupe", "Sedan", "SUV", "Convertible"]
-)
-
-# =====================================================
 # ENCODING MAPS
 # =====================================================
+# IMPORTANT: These values must exactly match the sklearn LabelEncoder
+# codes the model was TRAINED with (see MLEPROJECT_FINAL.ipynb, Section 4).
+# LabelEncoder assigns codes alphabetically across ALL categories present
+# in the full training dataset, not just the ones shown in this dropdown.
+# The previous version of this file used made-up numbers here, which is
+# why different cars were producing the same/near-identical price.
 make_map = {
-    "BMW": 7,
-    "Audi": 1,
-    "Toyota": 2,
-    "Honda": 3,
-    "Ford": 4
+    "Acura": 0, "Alfa Romeo": 1, "Aston Martin": 2, "Audi": 3, "BMW": 4,
+    "Bentley": 5, "Bugatti": 6, "Buick": 7, "Cadillac": 8, "Chevrolet": 9,
+    "Chrysler": 10, "Dodge": 11, "FIAT": 12, "Ferrari": 13, "Ford": 14,
+    "GMC": 15, "Genesis": 16, "HUMMER": 17, "Honda": 18, "Hyundai": 19,
+    "Infiniti": 20, "Kia": 21, "Lamborghini": 22, "Land Rover": 23,
+    "Lexus": 24, "Lincoln": 25, "Lotus": 26, "Maserati": 27, "Maybach": 28,
+    "Mazda": 29, "McLaren": 30, "Mercedes-Benz": 31, "Mitsubishi": 32,
+    "Nissan": 33, "Oldsmobile": 34, "Plymouth": 35, "Pontiac": 36,
+    "Porsche": 37, "Rolls-Royce": 38, "Saab": 39, "Scion": 40, "Spyker": 41,
+    "Subaru": 42, "Suzuki": 43, "Tesla": 44, "Toyota": 45, "Volkswagen": 46,
+    "Volvo": 47
 }
 
 fuel_map = {
-    "Premium": 3,
-    "Regular": 1,
-    "Diesel": 2
+    "Diesel": 0,
+    "Electric": 1,
+    "Flex-fuel (premium unleaded recommended/E85)": 2,
+    "Flex-fuel (premium unleaded required/E85)": 3,
+    "Flex-fuel (unleaded/E85)": 4,
+    "Flex-fuel (unleaded/natural gas)": 5,
+    "Natural Gas": 6,
+    "Premium Unleaded (recommended)": 7,
+    "Premium Unleaded (required)": 8,
+    "Regular Unleaded": 9
 }
 
 trans_map = {
-    "Manual": 4,
-    "Automatic": 0
+    "Automated Manual": 0,
+    "Automatic": 1,
+    "Direct Drive": 2,
+    "Manual": 3
 }
 
 drive_map = {
-    "Rear Wheel Drive": 2,
-    "Front Wheel Drive": 1,
-    "All Wheel Drive": 0
+    "All Wheel Drive": 0,
+    "Four Wheel Drive": 1,
+    "Front Wheel Drive": 2,
+    "Rear Wheel Drive": 3
 }
 
 size_map = {
     "Compact": 0,
-    "Midsize": 1,
-    "Large": 2
+    "Large": 1,
+    "Midsize": 2
 }
 
 style_map = {
-    "Coupe": 2,
-    "Sedan": 3,
-    "SUV": 4,
-    "Convertible": 1
+    "2dr Hatchback": 0, "2dr SUV": 1, "4dr Hatchback": 2, "4dr SUV": 3,
+    "Cargo Minivan": 4, "Cargo Van": 5, "Convertible": 6,
+    "Convertible SUV": 7, "Coupe": 8, "Crew Cab Pickup": 9,
+    "Extended Cab Pickup": 10, "Passenger Minivan": 11, "Passenger Van": 12,
+    "Regular Cab Pickup": 13, "Sedan": 14, "Wagon": 15
 }
+
+# =====================================================
+# DROPDOWNS
+# =====================================================
+make_enc = st.selectbox("Car Brand", list(make_map.keys()), index=list(make_map.keys()).index("BMW"))
+fuel_enc = st.selectbox("Fuel Type", list(fuel_map.keys()), index=list(fuel_map.keys()).index("Premium Unleaded (required)"))
+trans_enc = st.selectbox("Transmission", list(trans_map.keys()), index=list(trans_map.keys()).index("Manual"))
+drive_enc = st.selectbox("Drive Type", list(drive_map.keys()), index=list(drive_map.keys()).index("Rear Wheel Drive"))
+size_enc = st.selectbox("Vehicle Size", list(size_map.keys()))
+style_enc = st.selectbox("Vehicle Style", list(style_map.keys()), index=list(style_map.keys()).index("Coupe"))
 
 # =====================================================
 # PREDICTION
