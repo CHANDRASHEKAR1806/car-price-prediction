@@ -19,7 +19,18 @@ st.set_page_config(
 apply_custom_styles()
 
 BASE_DIR = Path(__file__).parent.parent
-model = joblib.load(BASE_DIR / "car_price_gradient_boosting.pkl")
+
+# Safe Model Loading
+@st.cache_resource
+def load_gbm_model():
+    model_path = BASE_DIR / "car_price_gradient_boosting.pkl"
+    return joblib.load(model_path)
+
+try:
+    model = load_gbm_model()
+except Exception as e:
+    st.error(f"⚠️ Model Loading Error: {e}")
+    model = None
 
 # Real car images
 sports_img = get_asset_image("luxury_sports")
@@ -170,7 +181,7 @@ if reset_btn:
 # =====================================================
 # PREDICTION RESULTS & ANALYTICS
 # =====================================================
-if predict_btn or "last_prediction" in st.session_state:
+if (predict_btn or "last_prediction" in st.session_state) and model is not None:
 
     features = np.array([[
         engine_hp,
