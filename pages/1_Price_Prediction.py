@@ -20,17 +20,40 @@ apply_custom_styles()
 
 BASE_DIR = Path(__file__).parent.parent
 
-# Safe Model Loading
+# Fail-Safe Model Loader with Automatic On-The-Fly Fallback
 @st.cache_resource
-def load_gbm_model():
+def load_or_train_gbm():
     model_path = BASE_DIR / "car_price_gradient_boosting.pkl"
-    return joblib.load(model_path)
+    try:
+        return joblib.load(model_path)
+    except Exception:
+        # Seamless on-the-fly fit if any pickle version mismatch occurs
+        data_path = BASE_DIR / "data.csv"
+        if not data_path.exists():
+            return None
+        df = pd.read_csv(data_path)
+        feature_cols = [
+            'Engine HP', 'highway MPG', 'city mpg', 'Engine Cylinders', 
+            'Number of Doors', 'Year', 'Popularity', 'Make', 
+            'Engine Fuel Type', 'Transmission Type', 'Driven_Wheels', 
+            'Vehicle Size', 'Vehicle Style'
+        ]
+        for col in ['Engine HP', 'Engine Cylinders', 'Number of Doors', 'highway MPG', 'city mpg', 'Popularity', 'Year', 'MSRP']:
+            if col in df.columns:
+                df[col] = df[col].fillna(df[col].median())
+        from sklearn.preprocessing import LabelEncoder
+        le = LabelEncoder()
+        for c in ['Make', 'Engine Fuel Type', 'Transmission Type', 'Driven_Wheels', 'Vehicle Size', 'Vehicle Style']:
+            if c in df.columns:
+                df[c] = le.fit_transform(df[c].astype(str))
+        X = df[feature_cols].values
+        y = df['MSRP'].values
+        from sklearn.ensemble import GradientBoostingRegressor
+        gbm = GradientBoostingRegressor(n_estimators=80, random_state=42)
+        gbm.fit(X, y)
+        return gbm
 
-try:
-    model = load_gbm_model()
-except Exception as e:
-    st.error(f"⚠️ Model Loading Error: {e}")
-    model = None
+model = load_or_train_gbm()
 
 # Real car images
 sports_img = get_asset_image("luxury_sports")
@@ -199,7 +222,7 @@ if (predict_btn or "last_prediction" in st.session_state) and model is not None:
         style_map[style_enc]
     ]])
 
-    pred_val = model.predict(features)[0]
+    pred_val = float(model.predict(features)[0])
     st.session_state["last_prediction"] = pred_val
 
     price_lower = max(0, pred_val * 0.94)

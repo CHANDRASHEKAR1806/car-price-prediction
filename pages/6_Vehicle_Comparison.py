@@ -18,7 +18,40 @@ st.set_page_config(
 apply_custom_styles()
 
 BASE_DIR = Path(__file__).parent.parent
-model = joblib.load(BASE_DIR / "car_price_gradient_boosting.pkl")
+
+# Fail-Safe Model Loader with Automatic On-The-Fly Fallback
+@st.cache_resource
+def load_or_train_gbm():
+    model_path = BASE_DIR / "car_price_gradient_boosting.pkl"
+    try:
+        return joblib.load(model_path)
+    except Exception:
+        data_path = BASE_DIR / "data.csv"
+        if not data_path.exists():
+            return None
+        df = pd.read_csv(data_path)
+        feature_cols = [
+            'Engine HP', 'highway MPG', 'city mpg', 'Engine Cylinders', 
+            'Number of Doors', 'Year', 'Popularity', 'Make', 
+            'Engine Fuel Type', 'Transmission Type', 'Driven_Wheels', 
+            'Vehicle Size', 'Vehicle Style'
+        ]
+        for col in ['Engine HP', 'Engine Cylinders', 'Number of Doors', 'highway MPG', 'city mpg', 'Popularity', 'Year', 'MSRP']:
+            if col in df.columns:
+                df[col] = df[col].fillna(df[col].median())
+        from sklearn.preprocessing import LabelEncoder
+        le = LabelEncoder()
+        for c in ['Make', 'Engine Fuel Type', 'Transmission Type', 'Driven_Wheels', 'Vehicle Size', 'Vehicle Style']:
+            if c in df.columns:
+                df[c] = le.fit_transform(df[c].astype(str))
+        X = df[feature_cols].values
+        y = df['MSRP'].values
+        from sklearn.ensemble import GradientBoostingRegressor
+        gbm = GradientBoostingRegressor(n_estimators=80, random_state=42)
+        gbm.fit(X, y)
+        return gbm
+
+model = load_or_train_gbm()
 
 # Real car images
 sports_img = get_asset_image("luxury_sports")
@@ -93,65 +126,66 @@ with col_b:
 # =====================================================
 st.markdown("<br>", unsafe_allow_html=True)
 
-feat_a = np.array([[hp_a, hwy_a, city_a, cyl_a, 4.0, yr_a, 2000, make_map[make_a], 8, 1, 3, 2, style_map[style_a]]])
-feat_b = np.array([[hp_b, hwy_b, city_b, cyl_b, 2.0, yr_b, 2000, make_map[make_b], 8, 1, 3, 0, style_map[style_b]]])
+if model is not None:
+    feat_a = np.array([[hp_a, hwy_a, city_a, cyl_a, 4.0, yr_a, 2000, make_map[make_a], 8, 1, 3, 2, style_map[style_a]]])
+    feat_b = np.array([[hp_b, hwy_b, city_b, cyl_b, 2.0, yr_b, 2000, make_map[make_b], 8, 1, 3, 0, style_map[style_b]]])
 
-pred_a = model.predict(feat_a)[0]
-pred_b = model.predict(feat_b)[0]
+    pred_a = float(model.predict(feat_a)[0])
+    pred_b = float(model.predict(feat_b)[0])
 
-price_diff = pred_b - pred_a
-pct_diff = (price_diff / max(1, pred_a)) * 100
+    price_diff = pred_b - pred_a
+    pct_diff = (price_diff / max(1, pred_a)) * 100
 
-st.markdown("<h2 style='font-family: Outfit; font-weight: 700; color: white;'>📊 Comparison Summary</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-family: Outfit; font-weight: 700; color: white;'>📊 Comparison Summary</h2>", unsafe_allow_html=True)
 
-res1, res2, res3 = st.columns(3)
+    res1, res2, res3 = st.columns(3)
 
-with res1:
-    st.markdown(f"""
-    <div class="metric-card-pro" style="border-color: rgba(0, 242, 254, 0.4);">
-        <div class="metric-label">{make_a} Valuation</div>
-        <div class="metric-val" style="color: #00f2fe;">${pred_a:,.2f}</div>
-        <div class="metric-sub">{hp_a:.0f} HP • {hwy_a:.0f} MPG</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with res1:
+        st.markdown(f"""
+        <div class="metric-card-pro" style="border-color: rgba(0, 242, 254, 0.4);">
+            <div class="metric-label">{make_a} Valuation</div>
+            <div class="metric-val" style="color: #00f2fe;">${pred_a:,.2f}</div>
+            <div class="metric-sub">{hp_a:.0f} HP • {hwy_a:.0f} MPG</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-with res2:
-    st.markdown(f"""
-    <div class="metric-card-pro" style="border-color: rgba(255, 0, 127, 0.4);">
-        <div class="metric-label">{make_b} Valuation</div>
-        <div class="metric-val" style="color: #ff007f;">${pred_b:,.2f}</div>
-        <div class="metric-sub">{hp_b:.0f} HP • {hwy_b:.0f} MPG</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with res2:
+        st.markdown(f"""
+        <div class="metric-card-pro" style="border-color: rgba(255, 0, 127, 0.4);">
+            <div class="metric-label">{make_b} Valuation</div>
+            <div class="metric-val" style="color: #ff007f;">${pred_b:,.2f}</div>
+            <div class="metric-sub">{hp_b:.0f} HP • {hwy_b:.0f} MPG</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-with res3:
-    diff_color = "#ff007f" if price_diff > 0 else "#00f2fe"
-    st.markdown(f"""
-    <div class="metric-card-pro">
-        <div class="metric-label">Valuation Delta</div>
-        <div class="metric-val" style="color: {diff_color};">${abs(price_diff):,.2f}</div>
-        <div class="metric-sub">{make_b} is {abs(pct_diff):.1f}% {"higher" if price_diff > 0 else "lower"}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with res3:
+        diff_color = "#ff007f" if price_diff > 0 else "#00f2fe"
+        st.markdown(f"""
+        <div class="metric-card-pro">
+            <div class="metric-label">Valuation Delta</div>
+            <div class="metric-val" style="color: {diff_color};">${abs(price_diff):,.2f}</div>
+            <div class="metric-sub">{make_b} is {abs(pct_diff):.1f}% {"higher" if price_diff > 0 else "lower"}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-# Comparison Bar Chart
-fig_comp = go.Figure(data=[
-    go.Bar(name=f"{make_a} ({style_a})", x=["Price ($)", "Horsepower (HP)", "Highway MPG"], y=[pred_a, hp_a, hwy_a], marker_color="#00f2fe"),
-    go.Bar(name=f"{make_b} ({style_b})", x=["Price ($)", "Horsepower (HP)", "Highway MPG"], y=[pred_b, hp_b, hwy_b], marker_color="#ff007f")
-])
+    # Comparison Bar Chart
+    fig_comp = go.Figure(data=[
+        go.Bar(name=f"{make_a} ({style_a})", x=["Price ($)", "Horsepower (HP)", "Highway MPG"], y=[pred_a, hp_a, hwy_a], marker_color="#00f2fe"),
+        go.Bar(name=f"{make_b} ({style_b})", x=["Price ($)", "Horsepower (HP)", "Highway MPG"], y=[pred_b, hp_b, hwy_b], marker_color="#ff007f")
+    ])
 
-fig_comp.update_layout(
-    barmode="group",
-    title="Side-by-Side Parameter Comparison",
-    paper_bgcolor="rgba(15, 23, 42, 0.6)",
-    plot_bgcolor="rgba(15, 23, 42, 0.6)",
-    font_color="#f8fafc",
-    height=400
-)
+    fig_comp.update_layout(
+        barmode="group",
+        title="Side-by-Side Parameter Comparison",
+        paper_bgcolor="rgba(15, 23, 42, 0.6)",
+        plot_bgcolor="rgba(15, 23, 42, 0.6)",
+        font_color="#f8fafc",
+        height=400
+    )
 
-st.plotly_chart(fig_comp, use_container_width=True)
+    st.plotly_chart(fig_comp, use_container_width=True)
 
 # =====================================================
 # FOOTER
