@@ -1,296 +1,180 @@
 import streamlit as st
+import pandas as pd
+from pathlib import Path
+from style_utils import apply_custom_styles, render_header, render_footer, get_asset_image
 
+# ==========================================
+# PAGE CONFIGURATION
+# ==========================================
 st.set_page_config(
-    page_title="Automobile Market Segmentation & Price Prediction",
+    page_title="AutoDriven | Automobile Intelligence Platform",
     page_icon="🚗",
     layout="wide"
 )
 
-
+# Apply global dark glassmorphism design system & top-left branding
+apply_custom_styles()
 
 # ==========================================
-# FOOTER
+# HERO HEADER
 # ==========================================
-st.markdown("""
-<style>
+render_header(
+    title="AutoDriven AI Platform",
+    subtitle="Strategic Automobile Market Analytics, Customer Segmentation & Precision Price Prediction Engine",
+    icon="🏎️",
+    tag="Cyberpunk AI Engine 2026"
+)
 
-/* Sidebar background */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(
-        180deg,
-        #0f172a 0%,
-        #1e293b 50%,
-        #2563eb 100%
-    );
-}
+# ==========================================
+# HERO SHOWCASE WITH REAL CAR IMAGE
+# ==========================================
+sports_img = get_asset_image("luxury_sports")
+sedan_img = get_asset_image("family_sedan")
+suv_img = get_asset_image("suv_pickup")
 
-/* Sidebar width */
-section[data-testid="stSidebar"] {
-    width: 320px !important;
-}
+hero_col1, hero_col2 = st.columns([1.3, 1])
 
-/* Navigation buttons */
-[data-testid="stSidebarNav"] {
-    padding-top: 20px;
-}
+with hero_col1:
+    st.markdown("""
+    <div class="glass-card" style="border-color: rgba(0, 242, 254, 0.4);">
+        <span class="badge badge-blue">ENTERPRISE INTELLIGENCE</span>
+        <h2 style="font-family: Outfit; font-weight: 800; color: white; margin-top: 10px;">AI-Driven Automobile Market Analytics</h2>
+        <p style="color: #cbd5e1; font-size: 1.05rem; line-height: 1.7;">
+            Welcome to <strong>AutoDriven AI</strong> — the next-generation machine learning platform built for vehicle price prediction, customer market cluster analysis, and real-time comparative valuation.
+        </p>
+        <div style="display: flex; gap: 15px; margin-top: 15px;">
+            <span style="color: #00f2fe; font-weight: 700;">✓ 11,914 Verified Vehicles</span>
+            <span style="color: #34d399; font-weight: 700;">✓ 95.83% Model Accuracy</span>
+            <span style="color: #ff007f; font-weight: 700;">✓ 3 Market Clusters</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-[data-testid="stSidebarNav"] a {
-    border-radius: 12px;
-    margin-bottom: 8px;
-    padding: 10px;
-}
+with hero_col2:
+    if sports_img:
+        st.image(sports_img, caption="🏎️ High-Performance Luxury Sports Valuation Class", use_container_width=True)
 
-[data-testid="stSidebarNav"] a:hover {
-    background-color: rgba(59,130,246,0.3);
-    border-left: 4px solid #60a5fa;
-}
+st.markdown("<br>", unsafe_allow_html=True)
 
-/* Selected page */
-[data-testid="stSidebarNav"] a[aria-current="page"] {
-    background: linear-gradient(90deg,#2563eb,#3b82f6);
-    border-radius: 12px;
-    color: white !important;
-    font-weight: bold;
-}
-
-/* Sidebar text */
-section[data-testid="stSidebar"] * {
-    color: white;
-}
-
-</style>
-""", unsafe_allow_html=True)
-# =========================
-# SIDEBAR
-# =========================
-
-
-# =========================
-# CUSTOM CSS
-# =========================
-
-st.markdown("""
-<style>
-
-.main{
-    padding-top:1rem;
-}
-
-.metric-card{
-    background:#172554;
-    padding:25px;
-    border-radius:18px;
-    text-align:center;
-    color:white;
-    box-shadow:0px 5px 15px rgba(0,0,0,.3);
-}
-
-.module-card{
-    background:#0f172a;
-    padding:25px;
-    border-radius:18px;
-    border:1px solid #334155;
-    margin-bottom:15px;
-    color:white;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# =========================
-# WELCOME SECTION
-# =========================
-
-st.markdown("""
-<h1 style='font-size:55px'>
-🚗 AutoDriven</h1>
-
-<h3 style='color:#3b82f6'>
-AI Vehicle Intelligence Platform
-</h3>
-""", unsafe_allow_html=True) 
-# =========================
-# HERO SECTION
-# =========================
-
-st.markdown("""
-<div style="
-background:linear-gradient(135deg,#2563eb,#4f46e5);
-padding:40px;
-border-radius:20px;
-color:white;
-margin-bottom:30px;
-">
-
-<h1>🚗 Automobile Market Segmentation & Price Prediction</h1>
-
-<h3>AI Powered Vehicle Analytics Platform</h3>
-
-<p>
-Predict vehicle prices, analyze market segments,
-compare machine learning models and generate business insights.
-</p>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-
-# =========================
-# PROJECT OVERVIEW
-# =========================
-
-st.subheader("📋 Project Overview")
-
-st.write("""
-✅ Automobile Price Prediction
-
-✅ Customer Market Segmentation
-
-✅ Machine Learning Model Comparison
-
-✅ Data Visualization & Analytics
-
-✅ Business Intelligence Dashboard
-
-✅ Performance Evaluation
-""")
-
-st.markdown("---")
-
-# =========================
-# PROJECT STATISTICS
-# =========================
-
-st.subheader("📊 Project Statistics")
-
+# ==========================================
+# EXECUTIVE SUMMARY STATS
+# ==========================================
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.markdown("""
-    <div class="metric-card">
-        <h3>Dataset Size</h3>
-        <h1>11,914</h1>
-        <p>Cars</p>
+    <div class="metric-card-pro">
+        <div class="metric-label">Dataset Vehicles</div>
+        <div class="metric-val">11,914</div>
+        <div class="metric-sub">Across 48 Top Brands</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
-    <div class="metric-card">
-        <h3>Best Model</h3>
-        <h1>GBM</h1>
-        <p>Gradient Boosting</p>
+    <div class="metric-card-pro">
+        <div class="metric-label">Best Model R²</div>
+        <div class="metric-val">95.83%</div>
+        <div class="metric-sub">Gradient Boosting Regressor</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col3:
     st.markdown("""
-    <div class="metric-card">
-        <h3>R² Score</h3>
-        <h1>95.83%</h1>
-        <p>Prediction Accuracy</p>
+    <div class="metric-card-pro">
+        <div class="metric-label">Customer Segments</div>
+        <div class="metric-val">3 Clusters</div>
+        <div class="metric-sub">K-Means Algorithmic Model</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col4:
     st.markdown("""
-    <div class="metric-card">
-        <h3>Segments</h3>
-        <h1>3</h1>
-        <p>Customer Clusters</p>
+    <div class="metric-card-pro">
+        <div class="metric-label">Features Tracked</div>
+        <div class="metric-val">16 Key Specs</div>
+        <div class="metric-sub">HP, MPG, Size, Style & Brand</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# =========================
-# PROJECT MODULES
-# =========================
+# ==========================================
+# PLATFORM MODULES SHOWCASE WITH REAL CAR IMAGES
+# ==========================================
+st.markdown("<h2 style='font-family: Outfit; font-weight: 700; color: white;'>🚀 Core Platform Modules</h2>", unsafe_allow_html=True)
 
-st.subheader("🚀 Project Modules")
+c1, c2 = st.columns(2)
 
-col1, col2 = st.columns(2)
-
-with col1:
-
+with c1:
     st.markdown("""
-    <div class="module-card">
-    <h3>💰 Price Prediction</h3>
-    Predict vehicle prices using the trained Gradient Boosting Model.
+    <div class="glass-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="color: #00f2fe; margin: 0; font-family: Outfit; font-weight: 700;">💰 Vehicle Price Predictor</h3>
+            <span class="badge badge-blue">Regression ML</span>
+        </div>
+        <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+            Leverage our trained <strong>Gradient Boosting model</strong> to estimate exact vehicle valuation based on engine specs, horsepower, fuel type, body style, and manufacture year.
+        </p>
     </div>
     """, unsafe_allow_html=True)
+    if sedan_img:
+        st.image(sedan_img, caption="🚙 Executive Sedan & Family Commuter Price Valuation Engine", use_container_width=True)
 
+with c2:
     st.markdown("""
-    <div class="module-card">
-    <h3>📊 Market Segmentation</h3>
-    Analyze automobile market clusters using K-Means Clustering.
+    <div class="glass-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="color: #34d399; margin: 0; font-family: Outfit; font-weight: 700;">📊 Customer Market Segmentation</h3>
+            <span class="badge badge-green">K-Means AI</span>
+        </div>
+        <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+            Explore vehicle market clusters (Economy Commuters, Mid-Range Family, Luxury Sports) using 3D interactive visualizations and classify any vehicle specs into buyer personas.
+        </p>
     </div>
     """, unsafe_allow_html=True)
+    if suv_img:
+        st.image(suv_img, caption="🏔️ Luxury SUV & All-Terrain Market Cluster Classification", use_container_width=True)
 
-with col2:
+st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="module-card">
-    <h3>📈 Model Performance</h3>
-    Compare Linear Regression, Random Forest and Gradient Boosting.
-    </div>
-    """, unsafe_allow_html=True)
+# ==========================================
+# LIVE DATASET EXPLORER SNIPPET
+# ==========================================
+st.markdown("<h2 style='font-family: Outfit; font-weight: 700; color: white;'>🔍 Dataset Quick Explorer</h2>", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="module-card">
-    <h3>📚 About Project</h3>
-    View methodology, implementation details and project insights.
-    </div>
-    """, unsafe_allow_html=True)
+BASE_DIR = Path(__file__).parent
+data_path = BASE_DIR / "data.csv"
 
-st.markdown("---")
+if data_path.exists():
+    @st.cache_data
+    def load_data():
+        df = pd.read_csv(data_path)
+        return df
 
-# =========================
-# QUICK INSIGHTS
-# =========================
+    df = load_data()
+    
+    col_filter1, col_filter2 = st.columns([1, 3])
+    with col_filter1:
+        selected_make = st.selectbox("Filter Brand", ["All Makes"] + sorted(df["Make"].dropna().unique().tolist()))
+    with col_filter2:
+        search_query = st.text_input("Search Vehicle Model", placeholder="e.g. M3, Camry, Mustang, Civic...")
 
-st.subheader("📌 Quick Insights")
+    filtered_df = df.copy()
+    if selected_make != "All Makes":
+        filtered_df = filtered_df[filtered_df["Make"] == selected_make]
+    if search_query:
+        filtered_df = filtered_df[filtered_df["Model"].astype(str).str.contains(search_query, case=False, na=False)]
 
-col1, col2, col3 = st.columns(3)
+    st.markdown(f"<span style='color: #94a3b8; font-size: 0.9rem;'>Showing <strong>{len(filtered_df):,}</strong> matching records out of {len(df):,} total</span>", unsafe_allow_html=True)
+    st.dataframe(
+        filtered_df[["Make", "Model", "Year", "Engine HP", "Engine Cylinders", "Transmission Type", "Driven_Wheels", "highway MPG", "city mpg", "MSRP"]].head(10),
+        use_container_width=True
+    )
 
-with col1:
-    st.info("🚗 11,914 automobile records analyzed")
+st.markdown("<br>", unsafe_allow_html=True)
 
-with col2:
-    st.info("🎯 95.83% prediction accuracy achieved")
-
-with col3:
-    st.info("📊 3 customer market segments identified")
-
-st.markdown("---")
-st.link_button(
-    "🔗 View Source Code",
-    "https://github.com/CHANDRASHEKAR1806/car-price-prediction"
-)
-
-
-# =========================
+# ==========================================
 # FOOTER
-# =========================
-
-st.success("🎯 Use the navigation menu on the left to explore all project modules.")
-
-st.markdown("---")
-
-st.markdown("""
-<center>
-
-<h4>🚗 AutoDriven</h4>
-
-Strategic Automobile Analytics Platform
-
-Developed using Streamlit, Machine Learning,
-K-Means Clustering and Gradient Boosting.
-
-<br>
-
-© 2026 Automobile Market Segmentation & Price Prediction Project
-
-</center>
-""", unsafe_allow_html=True)
+# ==========================================
+render_footer()
